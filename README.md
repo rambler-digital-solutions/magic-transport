@@ -7,8 +7,8 @@ npm install --save magic-transport
 ```
 
 ## Использование
-На стороне страницы, на которой вставлен `iframe` (это страница `Provider`), вставьте следующий код: 
-```
+На стороне страницы, на которой вставлен `iframe` (это страница `Provider`), вставьте следующий код:
+```js
 import { Provider } from 'magic-transport'
 
 const iframeOrigin = '*'
@@ -39,7 +39,7 @@ transport.once('ready', function () {
 ```
 <br><br>
 На стороне страницы, загруженной внутри `iframe` (это страница `Consumer`), вставьте следующий код:
-```
+```js
 import { Consumer } from 'magic-transport'
 
 const parentOrigin = '*'
@@ -67,7 +67,7 @@ transport.once('ready', function () {
 <br><br>
 Таким образом любые интерфейсы Consumer и Provider могут возвращать любые значения, они будут отрезолвлены как Promise. Переданные функции будут так же вызваны.
 
-Так же Consumer и Provider наследуют интерфейс [EventEmitter](nodejs.org/api/events.html).
+Так же Consumer и Provider наследуют интерфейс [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
 
-## TODO 
-Написать тесты.
+## TODO
+* [ ] Написать тесты.
