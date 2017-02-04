@@ -69,5 +69,33 @@ transport.once('ready', function () {
 
 Так же Consumer и Provider наследуют интерфейс [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
 
+<br><br>
+### Присоединение к произвольному окну/iframe
+```js
+import { Provider } from 'magic-transport'
+
+const iframeOrigin = '*'
+const sharedObject = {
+  hello: {
+    from: {
+      provider: function () {
+        return 'hello from provider'
+      }
+    }
+  }
+}
+
+const iframe = document.createElement('iframe')
+iframe.src = 'https://weather.rambler.ru'
+document.body.appendChild(iframe)
+
+const transport = new Provider(
+  'YOUR_UNIQ_ID_HERE', 
+  iframeOrigin, 
+  iframe.contentWindow, 
+  sharedObject
+)
+```
+
 ## TODO
 * [ ] Написать тесты.
