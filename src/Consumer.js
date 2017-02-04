@@ -7,7 +7,7 @@ export default class Consumer extends Transport {
     super(id, expectedOrigin)
     const events = new EventEmitter
     events.setMaxListeners(0)
-    this.connectedWindow = window.parent || window.opener
+    this.connectedWindow = window.opener || window.parent
     this.consumer = this.facade = Object.assign(events, facade)
     this.sendMessage({
       type: 'initialize',

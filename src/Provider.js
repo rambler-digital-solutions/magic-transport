@@ -3,8 +3,12 @@ import EventEmitter from 'events'
 
 export default class Provider extends Transport {
 
-  constructor(id, expectedOrigin, facade) {
-    super(id, expectedOrigin)
+  constructor(id, expectedOrigin, connectedWindow, facade) {
+    if (!facade) {
+      facade = connectedWindow
+      connectedWindow = null
+    }
+    super(id, expectedOrigin, connectedWindow)
     const events = new EventEmitter
     Object.assign(events, facade)
     events.setMaxListeners(0)

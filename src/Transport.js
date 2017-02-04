@@ -6,9 +6,10 @@ import { parse, stringify } from './utils/JSON'
 
 export default class Transport {
 
-  constructor(id, expectedOrigin) {
+  constructor(id, expectedOrigin, connectedWindow) {
     EventEmitter.call(this)
     this.expectedOrigin = expectedOrigin
+    this.connectedWindow = connectedWindow
     this.links = {}
     this.i = 0
     this.onMessage = this.onMessage.bind(this)
