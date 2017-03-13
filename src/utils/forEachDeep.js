@@ -1,30 +1,30 @@
 import forIn from 'lodash/forIn'
 
-function forEachObject(obj, fn, path) {
+function forEachObject(obj, fn, path, level) {
   forIn(obj, (v, key) => {
     const deepPath = path ? path + '.' + key : key
-    const result = fn.call(obj, obj[key], key, obj, deepPath)
+    const result = fn.call(obj, obj[key], key, obj, deepPath, level)
     if (result !== false)
-      forEach(obj[key], fn, deepPath)
+      forEach(obj[key], fn, deepPath, level + 1)
   })
 }
 
-function forEachArray(array, fn, path) {
+function forEachArray(array, fn, path, level) {
   let deepPath = ''
 
   array.forEach((value, index, arr) => {
     deepPath = path + '[' + index + ']'
-    const result = fn.call(arr, value, index, arr, deepPath)
+    const result = fn.call(arr, value, index, arr, deepPath, level)
     if (result !== false)
-      forEach(arr[index], fn, deepPath)
+      forEach(arr[index], fn, deepPath, level + 1)
   })
 }
 
-export default function forEach(value, fn, path) {
+export default function forEach(value, fn, path, level = 0) {
   path = path || ''
 
   if (Array.isArray(value))
-    forEachArray(value, fn, path)
+    forEachArray(value, fn, path, level)
   else if (value && typeof value === 'object' && !(value instanceof Error))
-    forEachObject(value, fn, path)
+    forEachObject(value, fn, path, level)
 }

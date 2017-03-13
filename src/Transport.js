@@ -11,6 +11,7 @@ export default class Transport {
     this.expectedOrigin = expectedOrigin
     this.connectedWindow = connectedWindow
     this.functions = {}
+    this.contexts = {}
     this.unpackedFunctions = {}
     this.i = 0
     this.onMessage = this.onMessage.bind(this)
@@ -22,11 +23,12 @@ export default class Transport {
   destroy() {
     this.unsubscribeEvents()
     this.functions = {}
+    this.contexts = {}
     this.unpackedFunctions = {}
   }
 
   generateId() {
-    return this.transportId + ':' + (++this.i)
+    return ++this.i
   }
 
   subscribeEvents() {
@@ -44,28 +46,41 @@ export default class Transport {
   pack(object) {
     const functions = {}
     const checkedValues = []
-    forEachDeep(object, (value, prop, subject, path) => {
+    forEachDeep(object, (value, prop, subject, path, level) => {
       if (checkedValues.includes(value))
         return false
       if (typeof value === 'function') {
-        let id = value.__magicTransportFunctionId
-        if (!id) {
-          id = this.generateId()
-          Object.defineProperty(value, '__magicTransportFunctionId', {
+        const context = level === 0 ? window : subject
+        const functionKey = `__${this.transportId}:functionId`
+        let functionId = value[functionKey]
+        if (!functionId) {
+          functionId = this.generateId()
+          Object.defineProperty(value, functionKey, {
             get() {
-              return id
+              return functionId
             }
           })
-          this.functions[id] = (...args) =>
+          this.functions[functionId] = (ctx, args) =>
             new Promise((resolve, reject) => {
               try {
-                Promise.resolve(value(...args)).then(resolve, reject)
+                Promise.resolve(value.apply(ctx, args)).then(resolve, reject)
               } catch (e) {
                 reject(e)
               }
             })
         }
-        functions[path] = id
+        const contextKey = `__${this.transportId}:contextId`
+        let contextId = context[contextKey]
+        if (!contextId) {
+          contextId = this.generateId()
+          Object.defineProperty(context, contextKey, {
+            get() {
+              return contextId
+            }
+          })
+          this.contexts[contextId] = context
+        }
+        functions[path] = [functionId, contextId]
       } else if (typeof value === 'object') {
         checkedValues.push(value)
       }
@@ -79,20 +94,22 @@ export default class Transport {
     })
   }
 
-  unpackFunction(functionId) {
-    if (!this.unpackedFunctions[functionId])
-      this.unpackedFunctions[functionId] = (...args) => (
+  unpackFunction(value) {
+    const [functionId, contextId] = value
+    const key = `${functionId}|${contextId}`
+    if (!this.unpackedFunctions[key])
+      this.unpackedFunctions[key] = (...args) => (
         this.sendMessage({
           args,
-          functionId,
+          functionToInvoke: value,
           type: 'invoke',
           waitResponse: true
         }).then(({ response: { result } }) => result)
       )
-    return this.unpackedFunctions[functionId]
+    return this.unpackedFunctions[key]
   }
 
-  sendMessage({ type, args = [], response = {}, responseToId, functionId, waitResponse }) {
+  sendMessage({ type, args = [], response = {}, responseToId, functionToInvoke, waitResponse }) {
     const id = this.generateId()
     const data = {
       [this.transportId]: {
@@ -100,7 +117,7 @@ export default class Transport {
         type,
         args,
         responseToId,
-        functionId,
+        functionToInvoke,
         response,
         functions: { ...this.pack(args), ...this.pack(response) },
         ts: Date.now()
@@ -170,11 +187,13 @@ export default class Transport {
     this.emit(`response:${responseToId}`, data)
   }
 
-  handleInvoke({ functionId, args, id }) {
+  handleInvoke({ functionToInvoke, args, id }) {
+    const [functionId, contextId] = functionToInvoke
     const func = this.functions[functionId]
+    const context = this.contexts[contextId]
     new Promise((resolve, reject) => {
       try {
-        Promise.resolve(func(...args)).then(resolve, (e) => {
+        Promise.resolve(func(context, args)).then(resolve, (e) => {
           reject(e)
           throw e
         })

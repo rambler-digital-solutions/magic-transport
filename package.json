@@ -1,6 +1,6 @@
 {
   "name": "magic-transport",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Transport for iframes",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "./node_modules/babel-cli/bin/babel.js ./src --out-dir ./lib",
+    "prepublish": "npm run eslint && npm run build",
+    "build": "./node_modules/babel-cli/bin/babel.js ./src --out-dir ./lib",
     "eslint": "./node_modules/eslint/bin/eslint.js --fix src/**"
   },
   "author": "Sergey Pereskokov s.pereskokov@rambler-co.ru",
