@@ -60,6 +60,8 @@ export default class Transport {
               return functionId
             }
           })
+        }
+        if (!this.functions[functionId])
           this.functions[functionId] = (ctx, args) =>
             new Promise((resolve, reject) => {
               try {
@@ -68,7 +70,6 @@ export default class Transport {
                 reject(e)
               }
             })
-        }
         const contextKey = `__${this.transportId}:contextId`
         let contextId = context[contextKey]
         if (!contextId) {
@@ -78,8 +79,9 @@ export default class Transport {
               return contextId
             }
           })
-          this.contexts[contextId] = context
         }
+        if (!this.contexts[contextId])
+          this.contexts[contextId] = context
         functions[path] = [functionId, contextId]
       } else if (typeof value === 'object') {
         checkedValues.push(value)
