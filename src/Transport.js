@@ -10,7 +10,8 @@ export default class Transport {
     EventEmitter.call(this)
     this.expectedOrigin = expectedOrigin
     this.connectedWindow = connectedWindow
-    this.links = {}
+    this.functions = {}
+    this.unpackedFunctions = {}
     this.i = 0
     this.onMessage = this.onMessage.bind(this)
     this.subscribeEvents()
@@ -20,11 +21,12 @@ export default class Transport {
 
   destroy() {
     this.unsubscribeEvents()
-    this.links = {}
+    this.functions = {}
+    this.unpackedFunctions = {}
   }
 
   generateId() {
-    return ++this.i
+    return this.transportId + ':' + (++this.i)
   }
 
   subscribeEvents() {
@@ -39,41 +41,55 @@ export default class Transport {
     return `MAGIC_TRANSPORT:${id}`
   }
 
-  link(object) {
-    const links = {}
+  pack(object) {
+    const functions = {}
     const checkedValues = []
     forEachDeep(object, (value, prop, subject, path) => {
       if (checkedValues.includes(value))
         return false
       if (typeof value === 'function') {
-        const id = this.generateId()
-        links[path] = id
-        this.links[id] = (...args) =>
-          new Promise((resolve, reject) => {
-            try {
-              Promise.resolve(value.call(subject, ...args)).then(resolve, reject)
-            } catch (e) {
-              reject(e)
+        let id = value.__magicTransportFunctionId
+        if (!id) {
+          id = this.generateId()
+          Object.defineProperty(value, '__magicTransportFunctionId', {
+            get() {
+              return id
             }
           })
+          this.functions[id] = (...args) =>
+            new Promise((resolve, reject) => {
+              try {
+                Promise.resolve(value(...args)).then(resolve, reject)
+              } catch (e) {
+                reject(e)
+              }
+            })
+        }
+        functions[path] = id
       } else if (typeof value === 'object') {
         checkedValues.push(value)
       }
     })
-    return links
+    return functions
   }
 
-  unlink(linkedArgs, links) {
-    forOwn(links, (value, key) => {
-      set(linkedArgs, key, (...args) => (
+  unpack(obj, functions) {
+    forOwn(functions, (value, key) => {
+      set(obj, key, this.unpackFunction(value))
+    })
+  }
+
+  unpackFunction(functionId) {
+    if (!this.unpackedFunctions[functionId])
+      this.unpackedFunctions[functionId] = (...args) => (
         this.sendMessage({
           args,
+          functionId,
           type: 'invoke',
-          functionId: value,
           waitResponse: true
         }).then(({ response: { result } }) => result)
-      ))
-    })
+      )
+    return this.unpackedFunctions[functionId]
   }
 
   sendMessage({ type, args = [], response = {}, responseToId, functionId, waitResponse }) {
@@ -86,7 +102,7 @@ export default class Transport {
         responseToId,
         functionId,
         response,
-        links: { ...this.link(args), ...this.link(response) },
+        functions: { ...this.pack(args), ...this.pack(response) },
         ts: Date.now()
       }
     }
@@ -132,18 +148,18 @@ export default class Transport {
   }
 
   handleMessage(data, source) {
-    const { type, args, links, response } = data
+    const { type, args, functions, response } = data
     switch (type) {
     case 'invoke':
-      this.unlink(args, links)
+      this.unpack(args, functions)
       this.handleInvoke(data)
       break
     case 'response':
-      this.unlink(response, links)
+      this.unpack(response, functions)
       this.handleResponse(data)
       break
     case 'initialize':
-      this.unlink(args, links)
+      this.unpack(args, functions)
       this.handleInitialize && this.handleInitialize(data, source)
       break
     }
@@ -155,7 +171,7 @@ export default class Transport {
   }
 
   handleInvoke({ functionId, args, id }) {
-    const func = this.links[functionId]
+    const func = this.functions[functionId]
     new Promise((resolve, reject) => {
       try {
         Promise.resolve(func(...args)).then(resolve, (e) => {

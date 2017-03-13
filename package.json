@@ -1,6 +1,6 @@
 {
   "name": "magic-transport",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Transport for iframes",
   "main": "index.js",
   "directories": {
@@ -8,19 +8,19 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "./node_modules/babel-cli/bin/babel.js ./src --out-dir ./lib"
+    "prepublish": "./node_modules/babel-cli/bin/babel.js ./src --out-dir ./lib",
+    "eslint": "./node_modules/eslint/bin/eslint.js --fix src/**"
   },
-  "author": "",
+  "author": "Sergey Pereskokov s.pereskokov@rambler-co.ru",
   "license": "ISC",
   "dependencies": {
-    "babel-runtime": "^6.11.6",
+    "babel-runtime": "^6.23.0",
     "lodash": "^4.15.0"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:rambler-digital-solutions/magic-transport.git"
   },
-  "author": "Sergey Pereskokov s.pereskokov@rambler-co.ru",
   "bugs": {
     "url": "https://github.com/rambler-digital-solutions/magic-transport/issues"
   },
@@ -28,17 +28,14 @@
     "babel": "^6.5.2",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.9.0",
-    "babel-eslint": "^6.0.4",
+    "babel-eslint": "^6.1.2",
     "babel-plugin-lodash": "^3.1.4",
-    "babel-plugin-transform-async-to-generator": "^6.8.0",
-    "babel-plugin-transform-class-properties": "^6.11.5",
-    "babel-plugin-transform-decorators": "^6.8.0",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-runtime": "^6.12.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.9.0",
     "babel-preset-es2015": "^6.9.0",
-    "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
+    "eslint": "^3.17.1",
+    "eslint-plugin-babel": "^4.1.1",
     "jasmine-core": "^2.5.2",
     "karma": "^1.3.0",
     "karma-jasmine": "^1.0.2",
