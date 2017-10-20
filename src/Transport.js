@@ -47,7 +47,7 @@ export default class Transport {
     const functions = {}
     const checkedValues = []
     forEachDeep(object, (value, prop, subject, path, level) => {
-      if (checkedValues.includes(value))
+      if (checkedValues.indexOf(value) !== -1)
         return false
       if (typeof value === 'function') {
         const context = level === 0 ? window : subject
