@@ -1,13 +1,12 @@
-import set from 'lodash/set'
-import forOwn from 'lodash/forOwn'
+import { set } from 'dot-prop'
 import EventEmitter from 'events'
 import forEachDeep from './utils/forEachDeep'
 import { parse, stringify } from './utils/JSON'
 
-export default class Transport {
+export default class Transport extends EventEmitter {
 
   constructor(id, expectedOrigin, connectedWindow) {
-    EventEmitter.call(this)
+    super()
     this.expectedOrigin = expectedOrigin
     this.connectedWindow = connectedWindow
     this.functions = {}
@@ -91,9 +90,9 @@ export default class Transport {
   }
 
   unpack(obj, functions) {
-    forOwn(functions, (value, key) => {
-      set(obj, key, this.unpackFunction(value))
-    })
+    for (const key in functions)
+      if (functions.hasOwnProperty(key))
+        set(obj, key, this.unpackFunction(functions[key]))
   }
 
   unpackFunction(value) {
@@ -214,6 +213,3 @@ export default class Transport {
   }
 
 }
-
-Object.assign(Transport.prototype, EventEmitter.prototype)
-
