@@ -10,9 +10,8 @@ export default class Provider extends Transport {
     }
     super(id, expectedOrigin, connectedWindow)
     const events = new EventEmitter
-    Object.assign(events, facade)
     events.setMaxListeners(0)
-    this.provider = this.facade = events
+    this.provider = this.facade = { ...events, ...facade }
   }
 
   handleInitialize({ id, args }, source) {
