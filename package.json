@@ -1,6 +1,6 @@
 {
   "name": "magic-transport",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Transport for iframes",
   "main": "lib/index.js",
   "files": [
