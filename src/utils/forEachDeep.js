@@ -11,7 +11,7 @@ function forEachArray(array, fn, path, level) {
   let deepPath = ''
 
   array.forEach((value, index, arr) => {
-    deepPath = path + '.' + index
+    deepPath = path ? path + '.' + index : index.toString()
     const result = fn.call(arr, value, index, arr, deepPath, level)
     if (result !== false)
       forEach(arr[index], fn, deepPath, level + 1)
