@@ -1,13 +1,17 @@
-# Magic transport
+# Magic Transport
+
 Библиотека для транспорта между iframe и родительским окном.
 
 ## Установка
-```
+
+```sh
 npm install --save magic-transport
 ```
 
 ## Использование
+
 На стороне страницы, на которой вставлен `iframe` (это страница `Provider`), вставьте следующий код:
+
 ```js
 import { Provider } from 'magic-transport'
 
@@ -37,8 +41,9 @@ transport.once('ready', function () {
   console.log(transport.connectedOrigin) // origin присоединенного документа
 })
 ```
-<br><br>
+
 На стороне страницы, загруженной внутри `iframe` (это страница `Consumer`), вставьте следующий код:
+
 ```js
 import { Consumer } from 'magic-transport'
 
@@ -64,13 +69,13 @@ transport.once('ready', function () {
   console.log(transport.connectedOrigin) // origin присоединенного документа
 })
 ```
-<br><br>
+
 Таким образом любые интерфейсы Consumer и Provider могут возвращать любые значения, они будут отрезолвлены как Promise. Переданные функции будут так же вызваны.
 
 Так же Consumer и Provider наследуют интерфейс [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
 
-<br><br>
 ### Присоединение к произвольному окну/iframe
+
 ```js
 import { Provider } from 'magic-transport'
 
@@ -97,5 +102,6 @@ const transport = new Provider(
 )
 ```
 
-## TODO
-* [ ] Написать тесты.
+## Лицензия
+
+MIT
