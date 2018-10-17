@@ -14,7 +14,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "rm -rf lib",
     "build": "babel src --out-dir lib",
-    "eslint": "eslint --fix src/**",
+    "lint": "eslint '**/*.js'",
+    "format": "prettier --write '**/*.js' && eslint '**/*.js' --fix",
     "size": "npm run build && size-limit",
     "precommit": "lint-staged",
     "prepublish": "npm run build",
@@ -47,11 +48,13 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-webpack": "^1.8.0",
     "lint-staged": "^7.0.4",
+    "prettier": "^1.14.3",
     "size-limit": "^0.17.0",
     "webpack": "^2.1.0-beta.25"
   },
   "lint-staged": {
     "*.js": [
+      "prettier --write",
       "eslint --fix",
       "git add"
     ]
