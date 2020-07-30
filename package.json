@@ -24,7 +24,7 @@
   "author": "Sergey Pereskokov s.pereskokov@rambler-co.ru",
   "license": "ISC",
   "dependencies": {
-    "dot-prop": "^3.0.0"
+    "dot-prop": "^5.1.1"
   },
   "repository": {
     "type": "git",
