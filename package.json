@@ -2,30 +2,27 @@
   "name": "magic-transport",
   "version": "2.1.2",
   "description": "Transport for iframes",
-  "main": "lib/index.js",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
   "files": [
-    "src",
-    "lib"
+    "cjs",
+    "esm",
+    "src"
   ],
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "rm -rf lib",
-    "build": "babel src --out-dir lib",
-    "lint": "eslint '**/*.js'",
-    "format": "prettier --write '**/*.js' && eslint '**/*.js' --fix",
-    "size": "npm run build && size-limit",
-    "precommit": "lint-staged",
-    "prepublish": "npm run build",
-    "postpublish": "rm -rf lib && git push --follow-tags"
+    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint '**/*.{js,ts}'",
+    "format": "prettier --write '**/*.{js,ts}' && eslint '**/*.{js,ts}' --fix",
+    "typecheck": "tsc -p tsconfig.esm.json --noEmit",
+    "sizecheck": "tsc -p tsconfig.esm.json && size-limit",
+    "docs": "typedoc --options typedoc.json",
+    "release": "semantic-release"
   },
   "author": "Sergey Pereskokov s.pereskokov@rambler-co.ru",
   "license": "ISC",
-  "dependencies": {
-    "dot-prop": "^3.0.0"
-  },
   "repository": {
     "type": "git",
     "url": "git@github.com:rambler-digital-solutions/magic-transport.git"
@@ -33,30 +30,34 @@
   "bugs": {
     "url": "https://github.com/rambler-digital-solutions/magic-transport/issues"
   },
+  "dependencies": {
+    "dot-prop": "^3.0.0"
+  },
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-core": "^6.9.0",
-    "babel-eslint": "^6.1.2",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "eslint": "^3.17.1",
-    "eslint-plugin-babel": "^4.1.1",
-    "husky": "^0.14.3",
-    "jasmine-core": "^2.5.2",
-    "karma": "^1.3.0",
-    "karma-jasmine": "^1.0.2",
-    "karma-phantomjs-launcher": "^1.0.2",
-    "karma-webpack": "^1.8.0",
-    "lint-staged": "^7.0.4",
-    "prettier": "^1.14.3",
-    "size-limit": "^1.3.8",
-    "webpack": "^2.1.0-beta.25"
+    "@size-limit/preset-big-lib": "^7.0.8",
+    "@size-limit/webpack-why": "^7.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.9.1",
+    "@typescript-eslint/parser": "^5.9.1",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "husky": "^7.0.4",
+    "jest": "^27.4.7",
+    "jest-environment-jsdom": "^27.4.6",
+    "lint-staged": "^12.1.7",
+    "prettier": "^2.5.1",
+    "semantic-release": "^18.0.1",
+    "size-limit": "^7.0.8",
+    "ts-jest": "^27.1.2",
+    "typedoc": "^0.22.10",
+    "typescript": "^4.5.4"
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,ts}": [
       "prettier --write",
-      "eslint --fix",
-      "git add"
+      "eslint --fix"
+    ],
+    "*.{json}": [
+      "prettier --write"
     ]
   }
 }

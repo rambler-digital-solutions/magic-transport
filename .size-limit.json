@@ -1,0 +1,14 @@
+[
+  {
+    "name": "The size of the provider",
+    "limit": "5 KB",
+    "path": "esm/index.js",
+    "import": "{Provider}"
+  },
+  {
+    "name": "The size of the consumer",
+    "limit": "5 KB",
+    "path": "esm/index.js",
+    "import": "{Consumer}"
+  }
+]
