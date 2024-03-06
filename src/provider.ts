@@ -1,11 +1,11 @@
 import EventEmitter from 'events'
-import {
-  Transport,
+import {Transport} from './transport'
+import type {
   InitializeMessage,
   ResponseMessage,
   Received,
   TransportOptions
-} from './Transport'
+} from './transport'
 
 export interface ProviderOptions<T> extends TransportOptions {
   facade?: T
@@ -23,24 +23,30 @@ export class Provider<P, C> extends Transport {
     facade
   }: ProviderOptions<P>) {
     super({id, expectedOrigin, connectedWindow})
+
     const events = new EventEmitter()
+
     events.setMaxListeners(0)
     this.provider = this.facade = Object.assign(events, facade)
   }
 
-  handleInitialize(
+  protected async handleInitialize(
     {id, args}: Received<InitializeMessage>,
     source?: Window
-  ): void {
-    if (!this.connectedWindow) this.connectedWindow = source
+  ): Promise<void> {
     const [consumerInterface] = args
+
+    this.connectedWindow ??= source
     this.consumer = consumerInterface
+
     const message: ResponseMessage = {
       type: 'response',
       response: {result: [this.provider]},
       responseToId: id,
       waitResponse: true
     }
-    this.sendMessage(message).then(() => this.emit('ready', consumerInterface))
+
+    await this.sendMessage(message)
+    this.emit('ready', consumerInterface)
   }
 }

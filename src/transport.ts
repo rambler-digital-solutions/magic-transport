@@ -3,19 +3,15 @@ import {set} from 'dot-prop'
 import {forEach} from './utils/for-each-deep'
 import {parse, stringify} from './utils/json'
 
-export interface Message {
-  type: string
-}
-
-export interface Response {
+interface Response {
   [key: string]: any
   result?: any
   error?: any
 }
 
-export type InvokingFunction = [number, string]
+type InvokingFunction = [number, string]
 
-export interface Message {
+interface Message {
   type: string
   id?: number
   args?: any[]
@@ -26,7 +22,7 @@ export interface Message {
   waitResponse?: boolean
 }
 
-export interface InvokeMessage extends Message {
+interface InvokeMessage extends Message {
   type: 'invoke'
   args: any[]
   functionToInvoke: InvokingFunction
@@ -47,27 +43,26 @@ export interface InitializeMessage extends Message {
 
 export type Received<T extends Message> = T & Required<Message>
 
-export type PackingValue = PackingObject | PackingArray | PackingFunction
+type PackingValue = PackingObject | PackingArray | PackingFunction
 
-export interface PackingFunction {
+interface PackingFunction {
   [key: string]: number
   (this: unknown, ...args: any[]): any
 }
 
-export interface PackingObject {
+interface PackingObject {
   [key: string]: PackingValue
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PackingArray extends Array<PackingValue> {}
+interface PackingArray extends Array<PackingValue> {}
 
-export type CallerFunction = (...args: any[]) => Promise<any>
+type CallerFunction = (...args: any[]) => Promise<any>
 
-export type Context = Window | unknown
+type Context = Window | unknown
 
 export interface TransportOptions {
-  id: string,
-  expectedOrigin: string,
+  id: string
+  expectedOrigin: string
   connectedWindow?: Window
 }
 
@@ -84,11 +79,7 @@ export class Transport extends EventEmitter {
   private i: number
   private transportId: string
 
-  public constructor({
-    id,
-    expectedOrigin,
-    connectedWindow
-  }: TransportOptions) {
+  public constructor({id, expectedOrigin, connectedWindow}: TransportOptions) {
     super()
     this.expectedOrigin = expectedOrigin
     this.connectedWindow = connectedWindow
@@ -127,49 +118,61 @@ export class Transport extends EventEmitter {
   private pack(object: Record<string, any>): Record<string, InvokingFunction> {
     const functions: Record<string, InvokingFunction> = {}
     const checkedValues: PackingValue[] = []
+
     forEach<PackingValue>(
       object,
+      // eslint-disable-next-line max-params
       (value: PackingValue, _, subject, path, level) => {
-        if (checkedValues.indexOf(value) !== -1) return false
-        if (typeof value === 'function') {
-          const context = level === 0 ? window : subject
-          const functionKey = `__${this.transportId}:functionId`
-          let functionId = value[functionKey]
-          if (!functionId) {
-            functionId = this.generateId()
-            Object.defineProperty(value, functionKey, {
-              get() {
-                return functionId
-              }
-            })
-          }
-          if (!this.functions[functionId])
-            this.functions[functionId] = (ctx, args) =>
-              new Promise((resolve, reject) => {
-                try {
-                  Promise.resolve(value.apply(ctx, args)).then(resolve, reject)
-                } catch (e) {
-                  reject(e)
-                }
-              })
-          const contextKey = `__${this.transportId}:contextId`
-          let contextId = context[contextKey]
-          if (!contextId) {
-            contextId = this.generateId()
-            Object.defineProperty(context, contextKey, {
-              get() {
-                return contextId
-              }
-            })
-          }
-          if (!this.contexts[contextId]) this.contexts[contextId] = context
-          functions[path] = [functionId, contextId]
-        } else if (typeof value === 'object') {
-          checkedValues.push(value)
+        if (checkedValues.includes(value)) {
+          return false
         }
+
+        if (typeof value === 'object') {
+          checkedValues.push(value)
+
+          return true
+        }
+
+        if (typeof value !== 'function') {
+          return true
+        }
+
+        const context: any = level === 0 ? window : subject
+        const functionKey = `__${this.transportId}:functionId`
+        let functionId = value[functionKey]
+
+        if (!functionId) {
+          functionId = this.generateId()
+          Object.defineProperty(value, functionKey, {
+            get() {
+              return functionId
+            }
+          })
+        }
+
+        this.functions[functionId] ??= async (ctx, args) => {
+          return await value.apply(ctx, args)
+        }
+
+        const contextKey = `__${this.transportId}:contextId`
+        let contextId = context[contextKey]
+
+        if (!contextId) {
+          contextId = this.generateId()
+          Object.defineProperty(context, contextKey, {
+            get() {
+              return contextId
+            }
+          })
+        }
+
+        this.contexts[contextId] ??= context
+        functions[path] = [functionId, contextId]
+
         return true
       }
     )
+
     return functions
   }
 
@@ -185,16 +188,22 @@ export class Transport extends EventEmitter {
   private unpackFunction(value: InvokingFunction): CallerFunction {
     const [functionId, contextId] = value
     const key = `${functionId}|${contextId}`
-    if (!this.unpackedFunctions[key])
-      this.unpackedFunctions[key] = (...args) => {
-        const message: InvokeMessage = {
-          args,
-          functionToInvoke: value,
-          type: 'invoke',
-          waitResponse: true
-        }
-        return this.sendMessage(message).then(({response: {result}}) => result)
+
+    this.unpackedFunctions[key] ??= async (...args) => {
+      const message: InvokeMessage = {
+        args,
+        functionToInvoke: value,
+        type: 'invoke',
+        waitResponse: true
       }
+
+      const {
+        response: {result}
+      } = await this.sendMessage(message)
+
+      return result
+    }
+
     return this.unpackedFunctions[key]
   }
 
@@ -231,8 +240,12 @@ export class Transport extends EventEmitter {
       this.expectedOrigin && this.expectedOrigin !== '*'
         ? this.expectedOrigin
         : '*'
+
     this.connectedWindow?.postMessage(stringify(data), origin)
-    if (waitResponse) return this.waitResponse(id)
+
+    if (waitResponse) {
+      return this.waitResponse(id)
+    }
   }
 
   private waitResponse(id: number): Promise<ResponseMessage> {
@@ -241,8 +254,12 @@ export class Transport extends EventEmitter {
         const {
           response: {error}
         } = data
-        if (error) reject(error)
-        else resolve(data)
+
+        if (error) {
+          reject(error)
+        } else {
+          resolve(data)
+        }
       })
     })
   }
@@ -258,13 +275,19 @@ export class Transport extends EventEmitter {
   private onMessage = (event: MessageEvent): void => {
     let {data} = event
     if (typeof data !== 'string' || !this.checkOrigin(event.origin)) return
+
     try {
       data = parse(data)
-    } catch (error) {
+    } catch {
       data = {}
     }
-    if (!data[this.transportId]) return
-    if (!this.connectedOrigin) this.connectedOrigin = event.origin
+
+    if (!data[this.transportId]) {
+      return
+    }
+
+    this.connectedOrigin ??= event.origin
+
     this.handleMessage(
       data[this.transportId],
       (event.source as Window) || undefined
@@ -293,53 +316,46 @@ export class Transport extends EventEmitter {
         break
       case 'initialize':
         this.unpack(data.args, data.functions)
-        this.handleInitialize && this.handleInitialize(data, source)
+        this.handleInitialize(data, source)
         break
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected handleInitialize(
     _data: Received<InitializeMessage>,
     _source?: Window
+    // eslint-disable-next-line no-empty-function
   ): void {}
 
   private handleResponse(data: Received<ResponseMessage>): void {
     const {responseToId} = data
+
     this.emit(`response:${responseToId}`, data)
   }
 
-  private handleInvoke({
+  private async handleInvoke({
     functionToInvoke,
     args,
     id
-  }: Received<InvokeMessage>): void {
+  }: Received<InvokeMessage>): Promise<void> {
     const [functionId, contextId] = functionToInvoke
     const func = this.functions[functionId]
     const context = this.contexts[contextId]
-    new Promise((resolve, reject) => {
-      try {
-        Promise.resolve(func(context, args)).then(resolve, (e) => {
-          reject(e)
-          throw e
-        })
-      } catch (e) {
-        reject(e)
-        throw e
-      }
-    }).then(
-      (result) =>
-        this.sendMessage({
-          type: 'response',
-          response: {result},
-          responseToId: id
-        }),
-      (error) =>
-        this.sendMessage({
-          type: 'response',
-          response: {error},
-          responseToId: id
-        })
-    )
+
+    try {
+      const result = await func(context, args)
+
+      this.sendMessage({
+        type: 'response',
+        response: {result},
+        responseToId: id
+      })
+    } catch (error) {
+      this.sendMessage({
+        type: 'response',
+        response: {error},
+        responseToId: id
+      })
+    }
   }
 }

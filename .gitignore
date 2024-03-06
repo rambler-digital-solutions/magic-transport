@@ -5,8 +5,7 @@ yarn-error.log
 coverage
 .nyc_output
 .vscode
-cjs
-esm
+dist
 deploy
 public
 spec.*

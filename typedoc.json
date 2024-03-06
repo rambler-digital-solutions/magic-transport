@@ -1,0 +1,12 @@
+{
+  "extends": "@rambler-tech/typedoc-config",
+  "customTitle": "Magic Transport",
+  "customDescription": "Transport for iframes",
+  "readme": "README.md",
+  "entryPoints": ["src/index.ts"],
+  "out": "public",
+  "includeVersion": false,
+  "navigationLinks": {
+    "Github": "https://github.com/rambler-digital-solutions/magic-transport"
+  }
+}
