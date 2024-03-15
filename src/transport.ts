@@ -62,14 +62,14 @@ type Context = Window | unknown
 
 export interface TransportOptions {
   id: string
-  expectedOrigin: string
+  expectedOrigin?: string
   connectedWindow?: Window
 }
 
 export class Transport extends EventEmitter {
   protected connectedWindow?: Window
   private connectedOrigin?: string
-  private expectedOrigin: string
+  private expectedOrigin?: string
   private functions: Record<
     string,
     (context: Context, args: any[]) => Promise<any>
@@ -180,9 +180,11 @@ export class Transport extends EventEmitter {
     object: PackingObject | PackingArray,
     functions?: Record<string, InvokingFunction>
   ): void {
-    for (const key in functions)
-      if (functions.hasOwnProperty(key))
+    for (const key in functions) {
+      if (functions.hasOwnProperty(key)) {
         set(object, key, this.unpackFunction(functions[key]))
+      }
+    }
   }
 
   private unpackFunction(value: InvokingFunction): CallerFunction {
@@ -274,7 +276,10 @@ export class Transport extends EventEmitter {
 
   private onMessage = (event: MessageEvent): void => {
     let {data} = event
-    if (typeof data !== 'string' || !this.checkOrigin(event.origin)) return
+
+    if (typeof data !== 'string' || !this.checkOrigin(event.origin)) {
+      return
+    }
 
     try {
       data = parse(data)

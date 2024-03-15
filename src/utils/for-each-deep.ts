@@ -16,14 +16,14 @@ const forEachObject = <T>(
   fn: Iterator<T>,
   {path, level}: IteratorOptions
 ): void => {
+  // need to iterate both own properties and prototype properties
+  // eslint-disable-next-line sonar/for-in
   for (const key in object) {
-    if (object.hasOwnProperty(key)) {
-      const deepPath = path ? `${path}.${key}` : key
-      const result = fn.call(object, object[key], key, object, deepPath, level)
+    const deepPath = path ? `${path}.${key}` : key
+    const result = fn.call(object, object[key], key, object, deepPath, level)
 
-      if (result !== false) {
-        forEach<T>(object[key], fn, {path: deepPath, level: level + 1})
-      }
+    if (result !== false) {
+      forEach<T>(object[key], fn, {path: deepPath, level: level + 1})
     }
   }
 }

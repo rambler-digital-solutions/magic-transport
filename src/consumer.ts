@@ -1,25 +1,61 @@
 import EventEmitter from 'events'
+import type {Promisify} from './types'
 import {Transport} from './transport'
 import type {TransportOptions, InitializeMessage} from './transport'
 
-export interface ConsumerOptions<T>
-  extends Omit<TransportOptions, 'connectedWindow'> {
-  facade?: T
-}
+export type ConsumerOptions<T> = Omit<
+  TransportOptions,
+  'connectedWindow' | 'expectedOrigin'
+> &
+  T & {parentOrigin?: string}
 
+/**
+ * Транспорт, использующийся на стороне страницы, загруженной внутри `iframe`
+ *
+ * ```js
+ * import {Consumer} from 'magic-transport'
+ *
+ * const id = 'UNIQ_ID'
+ * const parentOrigin = '*'
+ * const sharedObject = {
+ *   hello: {
+ *     from: {
+ *       consumer() {
+ *         return transport.provider.hello.from.provider()
+ *       }
+ *     }
+ *   },
+ *   timeout(callback, timeout) {
+ *     setTimeout(() => {
+ *       callback('hello from consumer')
+ *     }, timeout)
+ *   }
+ * }
+ *
+ * const transport = new Consumer({id, parentOrigin, ...sharedObject})
+ *
+ * transport.once('ready', () => {
+ *   // Tранспорт готов к использованию
+ * })
+ * ```
+ */
 export class Consumer<P, C> extends Transport {
   public consumer: C & EventEmitter
   public facade: C & EventEmitter
-  public provider?: P & EventEmitter
+  public provider!: Promisify<P & EventEmitter>
 
-  public constructor({id, expectedOrigin, facade}: ConsumerOptions<C>) {
+  public constructor({
+    id,
+    parentOrigin: expectedOrigin,
+    ...facade
+  }: ConsumerOptions<C>) {
     super({id, expectedOrigin})
 
     const events = new EventEmitter()
 
     events.setMaxListeners(0)
     this.connectedWindow = window.opener || window.parent
-    this.consumer = this.facade = Object.assign(events, facade)
+    this.consumer = this.facade = Object.assign(events, facade as C)
 
     this.initialize()
   }
@@ -38,7 +74,7 @@ export class Consumer<P, C> extends Transport {
 
     this.provider = result[0]
 
-    await this.sendMessage({type: 'response', responseToId})
+    this.sendMessage({type: 'response', responseToId})
     this.emit('ready', this.provider)
   }
 }
