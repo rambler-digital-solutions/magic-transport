@@ -3,16 +3,25 @@ import type {Promisify} from './types'
 import {Transport} from './transport'
 import type {TransportOptions, InitializeMessage} from './transport'
 
+/**
+ * Consumer options. See {@link Consumer} for more details.
+ */
 export type ConsumerOptions<T> = Omit<
   TransportOptions,
   'connectedWindow' | 'expectedOrigin'
 > &
-  T & {parentOrigin?: string}
+  T & {
+    /**
+     * Origin of the parent window.
+     */
+    parentOrigin?: string
+  }
 
 /**
- * Транспорт, использующийся на стороне страницы, загруженной внутри `iframe`
+ * Transport used on the page loaded inside an `iframe`.
+ * Inherits the interface [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
  *
- * ```js
+ * ```ts
  * import {Consumer} from 'magic-transport'
  *
  * const id = 'UNIQ_ID'
@@ -35,15 +44,21 @@ export type ConsumerOptions<T> = Omit<
  * const transport = new Consumer({id, parentOrigin, ...sharedObject})
  *
  * transport.once('ready', () => {
- *   // Tранспорт готов к использованию
+ *   // Transport is ready to use
  * })
  * ```
+ *
+ * @param P The provider facade.
+ * @param C The consumer facade.
  */
 export class Consumer<P, C> extends Transport {
   public consumer: C & EventEmitter
   public facade: C & EventEmitter
   public provider!: Promisify<P & EventEmitter>
 
+  /**
+   * Creates a new `Consumer` instance.
+   */
   public constructor({
     id,
     parentOrigin: expectedOrigin,

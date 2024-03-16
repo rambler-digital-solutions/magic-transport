@@ -1,7 +1,7 @@
 {
   "extends": "@rambler-tech/typedoc-config",
   "customTitle": "Magic Transport",
-  "customDescription": "Transport for iframes",
+  "customDescription": "Transport for communication between iframe and parent window",
   "readme": "README.md",
   "entryPoints": ["src/index.ts"],
   "out": "public",

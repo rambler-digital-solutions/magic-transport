@@ -60,12 +60,56 @@ type CallerFunction = (...args: any[]) => Promise<any>
 
 type Context = Window | unknown
 
+/**
+ * Base transport options.
+ */
 export interface TransportOptions {
+  /**
+   * Unique transport identifier.
+   * Must be the same for Provider and Consumer that communicate with each other.
+   */
   id: string
+  /**
+   * Origin of the attached window.
+   */
   expectedOrigin?: string
+  /**
+   * Attached window. Used for connecting to any window or `iframe`.
+   *
+   * ```ts
+   * import {Provider} from 'magic-transport'
+   *
+   * const id = 'UNIQ_ID'
+   * const childOrigin = '*'
+   * const sharedObject = {
+   *   hello: {
+   *     from: {
+   *       provider: function () {
+   *         return 'hello from provider'
+   *       }
+   *     }
+   *   }
+   * }
+   *
+   * const iframe = document.createElement('iframe')
+   * iframe.src = 'https://site.app/embed'
+   * document.body.appendChild(iframe)
+   *
+   * const transport = new Provider({
+   *   id,
+   *   childOrigin,
+   *   connectedWindow: iframe.contentWindow,
+   *   ...sharedObject
+   * });
+   * ```
+   */
   connectedWindow?: Window
 }
 
+/**
+ * Base transport.
+ * Inherits the interface [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
+ */
 export class Transport extends EventEmitter {
   protected connectedWindow?: Window
   private connectedOrigin?: string

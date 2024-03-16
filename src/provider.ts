@@ -9,9 +9,21 @@ import type {
 } from './transport'
 
 /**
- * Транспорт, использующийся на стороне страницы, на которой вставлен `iframe`
+ * Provider options. See {@link Provider} for more details.
+ */
+export type ProviderOptions<T> = Omit<TransportOptions, 'expectedOrigin'> &
+  T & {
+    /**
+     * Origin of the `iframe` window.
+     */
+    childOrigin?: string
+  }
+
+/**
+ * The transport used on the page where the `iframe` is embedded.
+ * Inherits the [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter) interface.
  *
- * ```js
+ * ```ts
  * import {Provider} from 'magic-transport'
  *
  * const id = 'UNIQ_ID'
@@ -29,18 +41,21 @@ import type {
  * const transport = new Provider({id, childOrigin, ...sharedObject})
  *
  * transport.once('ready', () => {
- *   // Tранспорт готов к использованию
+ *   // Transport is ready for use
  * })
  * ```
+ *
+ * @param P The provider facade.
+ * @param C The consumer facade.
  */
-export type ProviderOptions<T> = Omit<TransportOptions, 'expectedOrigin'> &
-  T & {childOrigin?: string}
-
 export class Provider<P, C> extends Transport {
   public provider: P & EventEmitter
   public facade: P & EventEmitter
   public consumer!: Promisify<C & EventEmitter>
 
+  /**
+   * Creates a new `Provider` instance.
+   */
   public constructor({
     id,
     childOrigin: expectedOrigin,

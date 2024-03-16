@@ -1,7 +1,7 @@
 {
   "name": "magic-transport",
   "version": "2.1.2",
-  "description": "Transport for iframes",
+  "description": "Transport for communication between iframe and parent window",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
