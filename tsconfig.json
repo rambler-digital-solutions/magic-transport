@@ -1,0 +1,13 @@
+{
+  "extends": "@rambler-tech/ts-config/base",
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "esnext",
+    "baseUrl": "src",
+    "outDir": "dist",
+    "sourceMap": false,
+    "declaration": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

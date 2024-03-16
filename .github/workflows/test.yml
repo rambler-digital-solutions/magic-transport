@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - v*
+
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: yarn
+          node-version: '18.x'
+      - run: yarn
+      - run: yarn test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: yarn
+          node-version: '18.x'
+      - run: yarn
+      - run: yarn lint
+      - run: yarn typecheck
+
+  size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: yarn
+          node-version: '18.x'
+      - run: yarn
+      - run: yarn sizecheck
+
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: yarn
+          node-version: '18.x'
+      - run: yarn
+      - uses: wagoid/commitlint-github-action@v3
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules

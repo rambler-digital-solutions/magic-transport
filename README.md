@@ -1,85 +1,95 @@
 # Magic Transport
 
-Библиотека для транспорта между iframe и родительским окном.
+Transport for communication between iframe and parent window
 
-## Установка
+## Install
 
 ```sh
-npm install --save magic-transport
+npm install magic-transport
 ```
 
-## Использование
+or
 
-На стороне страницы, на которой вставлен `iframe` (это страница `Provider`), вставьте следующий код:
+```sh
+yarn add magic-transport
+```
 
-```js
-import { Provider } from 'magic-transport'
+## Usage
 
-const iframeOrigin = '*'
+### Base example
+
+Insert the following code on the page where the `iframe` is embeded (`provider` page):
+
+```ts
+import {Provider} from 'magic-transport'
+
+const id = 'UNIQ_ID'
+const childOrigin = '*'
 const sharedObject = {
   hello: {
     from: {
-      provider: function () {
+      provider() {
         return 'hello from provider'
       }
     }
   }
 }
-const transport = new Provider('YOUR_UNIQ_ID_HERE', iframeOrigin, sharedObject)
 
-transport.once('ready', function () {
-  const consumer = transport.consumer
-  consumer.hello.from.consumer().then(result => {
-    console.log(result === 'hello from provider') // true
-  })
-  consumer.mySetTimeout(function (result) {
-    console.log(result === 'hello from consumer') // true
+const transport = new Provider({id, childOrigin, ...sharedObject})
+
+transport.once('ready', async () => {
+  const consumerResult = await transport.consumer.hello.from.consumer()
+
+  console.log(consumerResult) // 'hello from provider'
+
+  transport.consumer.timeout((result) => {
+    console.log(result) // 'hello from consumer'
   }, 1000)
-  consumer.on('my_event', function (result) {
-    console.log(result.foo === 'bar')
+
+  transport.consumer.on('my_event', (result) => {
+    console.log(result) // {foo: 'bar'}
   })
-  console.log(transport.connectedOrigin) // origin присоединенного документа
 })
 ```
 
-На стороне страницы, загруженной внутри `iframe` (это страница `Consumer`), вставьте следующий код:
+Insert the following code on the page loaded in the `iframe` (`consumer` page):
 
-```js
-import { Consumer } from 'magic-transport'
+```ts
+import {Consumer} from 'magic-transport'
 
+const id = 'UNIQ_ID'
 const parentOrigin = '*'
 const sharedObject = {
   hello: {
     from: {
-      consumer: function () {
+      consumer() {
         return transport.provider.hello.from.provider()
       }
     }
   },
-  mySetTimeout: function (callback, timeout) {
-    setTimeout(function () { callback('hello from consumer') }, timeout)
+  timeout(callback, timeout) {
+    setTimeout(() => {
+      callback('hello from consumer')
+    }, timeout)
   }
 }
 
-const transport = new Consumer('YOUR_UNIQ_ID_HERE', parentOrigin, sharedObject)
-transport.once('ready', function () {
-  setTimeout(function () {
-    transport.consumer.emit('my_event', { foo: 'bar' })
-  }, 1000)
-  console.log(transport.connectedOrigin) // origin присоединенного документа
+const transport = new Consumer({id, parentOrigin, ...sharedObject})
+
+transport.once('ready', () => {
+  transport.consumer.emit('my_event', {foo: 'bar'})
 })
 ```
 
-Таким образом любые интерфейсы Consumer и Provider могут возвращать любые значения, они будут отрезолвлены как Promise. Переданные функции будут так же вызваны.
+Both `Consumer` and `Provider` interfaces can return any values, which will be resolved as a Promise. Passed callbacks will be called as well.
 
-Так же Consumer и Provider наследуют интерфейс [EventEmitter](https://nodejs.org/api/events.html#events_class_eventemitter).
+### Connecting to any window or `iframe`
 
-### Присоединение к произвольному окну/iframe
+```ts
+import {Provider} from 'magic-transport'
 
-```js
-import { Provider } from 'magic-transport'
-
-const iframeOrigin = '*'
+const id = 'UNIQ_ID'
+const childOrigin = '*'
 const sharedObject = {
   hello: {
     from: {
@@ -91,17 +101,71 @@ const sharedObject = {
 }
 
 const iframe = document.createElement('iframe')
-iframe.src = 'https://weather.rambler.ru'
+iframe.src = 'https://site.app/embed'
 document.body.appendChild(iframe)
 
-const transport = new Provider(
-  'YOUR_UNIQ_ID_HERE', 
-  iframeOrigin, 
-  iframe.contentWindow, 
-  sharedObject
-)
+const transport = new Provider({
+  id,
+  childOrigin,
+  connectedWindow: iframe.contentWindow,
+  ...sharedObject
+});
 ```
 
-## Лицензия
+## Documentation
+
+Currently we only have the API which you can check [here](https://rambler-digital-solutions.github.io/magic-transport/).
+
+## Contributing
+
+### Start
+
+After you clone the repo you just need to run [`yarn`](https://yarnpkg.com/lang/en/docs/cli/#toc-default-command)'s default command to install and build the packages
+
+```
+yarn
+```
+
+### Testing
+
+We have a test suite consisting of a bunch of unit tests to verify utils keep working as expected. Test suit is run in CI on every commit.
+
+To run the tests
+
+```
+yarn test
+```
+
+To run the tests in watch mode
+
+```sh
+yarn test:watch
+```
+
+### Code quality
+
+To run linting the codebase
+
+```sh
+yarn lint
+```
+
+To check typings
+
+```sh
+yarn typecheck
+```
+
+To check bundle size
+
+```sh
+yarn sizecheck
+```
+
+## Discussion
+
+Please open an issue if you have any questions or concerns.
+
+## License
 
 MIT

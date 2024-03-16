@@ -1,5 +1,11 @@
 .DS_Store
 node_modules
-lib
-*.log
-.idea/
+npm-debug.log
+yarn-error.log
+coverage
+.nyc_output
+.vscode
+dist
+deploy
+public
+spec.*
