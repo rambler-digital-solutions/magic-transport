@@ -1273,24 +1273,10 @@
     eslint-plugin-todo-with-label "^2.0.0"
     eslint-plugin-unicorn "^51.0.1"
 
-"@rambler-tech/licenselint-config@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@rambler-tech/licenselint-config/-/licenselint-config-0.0.2.tgz#254ee41ef0c36771749633a1456344dfca409bbb"
-  integrity sha512-eUNP8Hin1W3D14DvcCpaT9mx4ouE2KPFWzt2JWaxgxeILJsVn9kjvV5Q/mZ0+N10wljaBtQ2gen2nRuBjfLbkg==
-
 "@rambler-tech/prettier-config@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@rambler-tech/prettier-config/-/prettier-config-0.1.0.tgz#e80dd5b7ea7f01f3fa30e86d785a68f0656882ff"
   integrity sha512-WyJcCAPDe7nsClWdBz3eOguhJJhhZRGjXQYWvB1JPbDpljxmiEwLD9IU1TcLvy/Smt9eq9Y4jh1sIupkKxrfmQ==
-
-"@rambler-tech/stylelint-config@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@rambler-tech/stylelint-config/-/stylelint-config-0.0.2.tgz#e3cc1ae27cc2326ac670c97925350f99e6286e31"
-  integrity sha512-emDK7uE3hv/kL0EadZ9uAoz3bgq2JhsYeHND47Nw+yeGJekopTqlPkJK9rXs0KoWS4SeMGyd9JdpS6g5s+KvOg==
-  dependencies:
-    stylelint-a11y "^1.2.3"
-    stylelint-config-prettier "^9.0.3"
-    stylelint-config-standard "^34.0.0"
 
 "@rambler-tech/ts-config@^0.1.1":
   version "0.1.1"
@@ -7399,28 +7385,6 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
   integrity sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==
-
-stylelint-a11y@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/stylelint-a11y/-/stylelint-a11y-1.2.3.tgz#e8db461fd493cdb9106da0c8040e0576ef96b8fd"
-  integrity sha512-S/iiKFUsYBfa4suxP0pYQqoPB9R1+SnvxVuzHHlz9al0IWxLZzXlnZEqEez0zNOhVh5iO3rATUmDnbZE5wm/pQ==
-
-stylelint-config-prettier@^9.0.3:
-  version "9.0.5"
-  resolved "https://registry.yarnpkg.com/stylelint-config-prettier/-/stylelint-config-prettier-9.0.5.tgz#9f78bbf31c7307ca2df2dd60f42c7014ee9da56e"
-  integrity sha512-U44lELgLZhbAD/xy/vncZ2Pq8sh2TnpiPvo38Ifg9+zeioR+LAkHu0i6YORIOxFafZoVg0xqQwex6e6F25S5XA==
-
-stylelint-config-recommended@^13.0.0:
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/stylelint-config-recommended/-/stylelint-config-recommended-13.0.0.tgz#c48a358cc46b629ea01f22db60b351f703e00597"
-  integrity sha512-EH+yRj6h3GAe/fRiyaoO2F9l9Tgg50AOFhaszyfov9v6ayXJ1IkSHwTxd7lB48FmOeSGDPLjatjO11fJpmarkQ==
-
-stylelint-config-standard@^34.0.0:
-  version "34.0.0"
-  resolved "https://registry.yarnpkg.com/stylelint-config-standard/-/stylelint-config-standard-34.0.0.tgz#309f3c48118a02aae262230c174282e40e766cf4"
-  integrity sha512-u0VSZnVyW9VSryBG2LSO+OQTjN7zF9XJaAJRX/4EwkmU0R2jYwmBSN10acqZisDitS0CLiEiGjX7+Hrq8TAhfQ==
-  dependencies:
-    stylelint-config-recommended "^13.0.0"
 
 supports-color@^5.3.0:
   version "5.5.0"
