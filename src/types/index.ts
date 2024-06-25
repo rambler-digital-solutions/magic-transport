@@ -5,5 +5,7 @@ type ArgumentTypes<F extends () => any> = F extends (...args: infer A) => any
 export type Promisify<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? (...args: ArgumentTypes<T[K]>) => Promise<ReturnType<T[K]>>
-    : Promisify<T[K]>
+    : T[K] extends object
+      ? Promisify<T[K]>
+      : T[K]
 }
