@@ -1,13 +1,13 @@
 [
   {
     "name": "The size of the provider",
-    "limit": "3.9 KB",
+    "limit": "3.8 KB",
     "path": "dist/index.js",
     "import": "{Provider}"
   },
   {
     "name": "The size of the consumer",
-    "limit": "3.9 KB",
+    "limit": "3.8 KB",
     "path": "dist/index.js",
     "import": "{Consumer}"
   }
