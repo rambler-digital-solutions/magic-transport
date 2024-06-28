@@ -9,6 +9,7 @@
     "dist",
     "src"
   ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "test": "jest",
